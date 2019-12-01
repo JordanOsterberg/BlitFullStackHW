@@ -66,7 +66,7 @@ app.post("/api/forecast", (req, res) => {
             coords: body.coord
         };
 
-        forecastCache.put(city, resultJSON, 10);
+        forecastCache.put(city, resultJSON, 60 * 30); // 30 minutes
 
         res.status(200).json(resultJSON);
     })
