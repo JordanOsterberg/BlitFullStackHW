@@ -19,13 +19,15 @@ if (weatherMapAPIKey === undefined || weatherMapAPIKey === "") {
     return process.exit(1);
 }
 
-// Ensure that there is a default value for PORT
-const port = _.defaults(process.env, {
-    PORT: 3000
-}).PORT;
-
 const Cache = require("./cache.js");
 const forecastCache = new Cache();
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,DELETE,PATCH");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, APIKey, SessionKey");
+    next();
+});
 
 app.post("/api/forecast", (req, res) => {
     const city = req.body.city;
@@ -47,9 +49,14 @@ app.post("/api/forecast", (req, res) => {
         return res.status(200).json(cachedObject);
     }
 
-    const weatherURL = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=imperial&APPID=" + weatherMapAPIKey;
+    const isCityZipCode = /^\d+$/.test(city);
 
-    request(weatherURL, (error, response, body) => {
+    const weatherURL = "http://api.openweathermap.org/data/2.5/weather/?";
+    const path = (isCityZipCode ?
+        "zip=" + city :
+        "q=" + city) + "&units=imperial&APPID=" + weatherMapAPIKey;
+
+    request(weatherURL + path, (error, response, body) => {
         if (error) {
             return res.status(500).json({
                 error: "Failed to communicate with weather API. Please try again later."
@@ -57,20 +64,37 @@ app.post("/api/forecast", (req, res) => {
         }
 
         body = JSON.parse(body);
+
+        if (body.cod !== '200' && body.cod !== 200) {
+            return res.status(Number(body.cod)).json({
+                error: body.message
+            })
+        }
+
         const resultJSON = {
             current: body.main.temp,
             high: body.main.temp_max,
             low: body.main.temp_min,
             city: body.name,
             city_id: body.id,
-            coords: body.coord
+            coords: body.coord,
+            method: isCityZipCode ? "zip" : "name"
         };
 
         forecastCache.put(city, resultJSON, 60 * 30); // 30 minutes
 
+        if (isCityZipCode) { // Insert the name of the city into the cache as well if we used a zip code
+            forecastCache.put(body.main.name, resultJSON, 60 * 30);
+        }
+
         res.status(200).json(resultJSON);
     })
 });
+
+// Ensure that there is a default value for PORT
+const port = _.defaults(process.env, {
+    PORT: 3000
+}).PORT;
 
 app.listen(port, () => {
     console.log("Began listening on port " + port);
