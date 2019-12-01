@@ -99,3 +99,5 @@ const port = _.defaults(process.env, {
 app.listen(port, () => {
     console.log("Began listening on port " + port);
 });
+
+module.exports = app;
