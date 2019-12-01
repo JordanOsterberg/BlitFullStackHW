@@ -1,3 +1,49 @@
 .App {
     margin: 16px;
 }
+
+.App img {
+    margin-top: 24px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.App input {
+    width: 540px;
+    height: 42px;
+    background-color: #D8D8D8;
+    border: none;
+    border-radius: 5px;
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+    padding-left: 8px;
+    font-size: 14px;
+}
+
+.App input::placeholder {
+    font-size: 14px;
+}
+
+.inputHolder {
+    margin: 0 auto;
+}
+
+.weatherResult {
+    text-align: center;
+}
+
+.button {
+    background-color: #0091FF;
+    color: white;
+    font-weight: 600;
+    border: none;
+    height: 36px;
+    font-size: 16px;
+    padding-left: 24px;
+    padding-right: 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    cursor: pointer;
+}
