@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const _ = require("underscore");
 require("dotenv").config();
 
 const app = express();
@@ -17,8 +18,15 @@ if (weatherMapAPIKey === undefined || weatherMapAPIKey === "") {
     return process.exit(1);
 }
 
+// Ensure that there is a default value for PORT
+const port = _.defaults(process.env, {
+    PORT: 3000
+}).PORT;
+
 app.post("/api/weather", (req, res) => {
     const weatherAPI = "http://api.openweathermap.org/data/2.5/forecast?id=524901&APPID=" + weatherMapAPIKey
 });
 
-module.exports = app;
+app.listen(port, () => {
+    console.log("Began listening on port " + port);
+});
