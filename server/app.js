@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const _ = require("underscore");
+const request = require("request");
 require("dotenv").config();
 
 const app = express();
@@ -23,8 +24,35 @@ const port = _.defaults(process.env, {
     PORT: 3000
 }).PORT;
 
-app.post("/api/weather", (req, res) => {
-    const weatherAPI = "http://api.openweathermap.org/data/2.5/forecast?id=524901&APPID=" + weatherMapAPIKey
+app.post("/api/forecast", (req, res) => {
+    const city = req.body.city;
+
+    if (city === undefined || _.isEmpty(city)) {
+        return res.status(400).json({
+            error: "No city specified."
+        })
+    }
+
+    const weatherURL = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=imperial&APPID=" + weatherMapAPIKey;
+
+    request(weatherURL, (error, response, body) => {
+        if (error) {
+            return res.status(500).json({
+                error: "Failed to communicate with weather API. Please try again later."
+            })
+        }
+
+        body = JSON.parse(body);
+
+        res.status(200).json({
+            current: body.main.temp,
+            high: body.main.temp_max,
+            low: body.main.temp_min,
+            city: body.name,
+            city_id: body.id,
+            coords: body.coord
+        })
+    })
 });
 
 app.listen(port, () => {
