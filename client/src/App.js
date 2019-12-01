@@ -11,6 +11,8 @@ export default class App extends React.Component {
         this.state = {
             displayWeatherResult: false,
             temperature: null,
+            temperatureHigh: null,
+            temperatureLow: null,
             serverCityName: null,
             isResultCached: false,
 
@@ -31,17 +33,28 @@ export default class App extends React.Component {
                     marginTop: 15
                 }}>
                     {this.state.displayWeatherResult ? <div className="weatherResult">
-                        <p>{this.state.serverCityName} is currently {this.state.temperature}&deg;F {this.state.isResultCached ? "(Cached)" : null}</p>
+                        <p>{this.state.serverCityName} is currently {this.state.temperature}&deg;F. The high is {this.state.temperatureHigh}&deg;F, and the low is {this.state.temperatureLow}&deg;F. {this.state.isResultCached ? "(Cached)" : null}</p>
                     </div> : null}
 
                     <input type="text"
                            placeholder="City Name or ZIP Code"
-                           onChange={this.handleCityInputChange.bind(this)}/>
+                           onChange={this.handleCityInputChange.bind(this)}
+                           onKeyPress={(e) => {
+                               if (e.key === "Enter") {
+                                   this.sendForecastRequest(this.state.cityInput, true)
+                               }
+                           }}
+                    />
 
                     <button onClick={(e) => {
                         e.preventDefault();
-                        this.sendForecastRequest(this.state.cityInput, false)
+                        this.sendForecastRequest(this.state.cityInput, true)
                     }}>Get Forekast!</button>
+
+                    {this.state.isResultCached ? <button onClick={(e) => {
+                        e.preventDefault();
+                        this.sendForecastRequest(this.state.cityInput, false)
+                    }}>Clear Cache</button> : null}
                 </div>
             </div>
         );
@@ -51,8 +64,6 @@ export default class App extends React.Component {
         const currentState = this.state;
         currentState.cityInput = event.target.value;
         this.setState(currentState);
-
-        this.sendForecastRequest(currentState.cityInput, true);
     }
 
     sendForecastRequest(cityInput, allowsCache) {
@@ -61,18 +72,19 @@ export default class App extends React.Component {
             uri: 'http://localhost:3000/api/forecast',
             body: {
                 city: cityInput,
-                allowsCache: allowsCache || true
+                allowsCache: allowsCache
             },
             json: true
         }, (error, response, body) => {
             if (error || body.err !== undefined) {
-
                 return;
             }
 
             const currentState = this.state;
             currentState.displayWeatherResult = true;
             currentState.temperature = body.current;
+            currentState.temperatureHigh = body.high;
+            currentState.temperatureLow = body.low;
             currentState.serverCityName = body.city;
             currentState.isResultCached = body.isCached;
             this.setState(currentState);
