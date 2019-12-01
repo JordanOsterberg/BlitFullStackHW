@@ -24,9 +24,7 @@ export default class App extends React.Component {
     render() {
         return (
             <div className="App">
-                <img src={"./logo.png"} alt="Forekast Zone" style={{
-                    maxHeight: 75
-                }}/>
+                <img src={"./logo.png"} alt="Forekast Zone" className="logo" />
 
                 <br/>
 
@@ -91,7 +89,7 @@ export default class App extends React.Component {
                 marginTop: 0
             }}>Low: {this.state.temperatureLow}&deg;F</h2>
 
-            <button style={{display: 'inline'}}
+            <button style={{display: 'inline', marginTop: 24}}
                     className="button"
                     onClick={(e) => {
                         e.preventDefault();
