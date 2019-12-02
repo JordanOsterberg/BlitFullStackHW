@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 
-const request = require("request");
+const ForekastServer = require("./ForkastServer");
 
 export default class App extends React.Component {
 
@@ -119,20 +119,8 @@ export default class App extends React.Component {
         this.setState(currentState);
     }
 
-    sendForecastRequest(cityInput, allowsCache) {
-        request({
-            method: 'POST',
-            uri: 'http://localhost:3000/api/forecast',
-            body: {
-                city: cityInput,
-                allowsCache: allowsCache
-            },
-            json: true
-        }, (error, response, body) => {
-            if (error || body.err !== undefined) {
-                return;
-            }
-
+    sendForecastRequest(cityInput: string, allowsCache: boolean) {
+        ForekastServer.fetchWeather(cityInput, allowsCache, (body) => {
             const currentState = this.state;
             currentState.displayWeatherResult = true;
             currentState.temperature = body.current;
