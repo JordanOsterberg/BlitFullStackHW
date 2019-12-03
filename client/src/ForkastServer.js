@@ -18,4 +18,21 @@ function fetchWeather(cityInput: string, allowsCache: boolean, completionHandler
     })
 }
 
-export { fetchWeather }
+function fetchHistoricalData(cityInput: string, completionHandler: function) {
+    request({
+        method: 'POST',
+        uri: 'http://localhost:3000/api/forecast/historical',
+        body: {
+            city: cityInput,
+        },
+        json: true
+    }, (error, response, body) => {
+        if (error || body.err !== undefined) {
+            return;
+        }
+
+        completionHandler(body);
+    })
+}
+
+export { fetchWeather, fetchHistoricalData }

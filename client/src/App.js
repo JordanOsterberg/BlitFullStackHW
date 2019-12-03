@@ -16,6 +16,7 @@ export default class App extends React.Component {
             serverCityName: null,
             zipCode: null,
             isResultCached: false,
+            historicalData: [],
 
             cityInput: null
         }
@@ -96,6 +97,7 @@ export default class App extends React.Component {
 
                         const currentState = this.state;
                         currentState.displayWeatherResult = false;
+                        currentState.historicalData = []; // clear historical data
                         this.setState(currentState);
                     }}>
                 Change Location
@@ -110,7 +112,38 @@ export default class App extends React.Component {
                     }}>
                 Reset Cache
             </button>
+
+            {this.state.historicalData.length !== 0 ? this.renderHistoricalDataTable() : null}
         </div>;
+    }
+
+    renderHistoricalDataTable() {
+        return <div style={{
+            marginTop: 36
+        }}>
+            <h2 style={{
+                fontWeight: 'bold',
+                textAlign: 'left'
+            }}>Historical Data</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date and Time</th>
+                        <th>Temperature</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {this.state.historicalData.map((data) => {
+                        const options = {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'};
+
+                        return <tr key={data.id}>
+                            <td>{new Date(data.timestamp).toLocaleTimeString("en-US", options)}</td>
+                            <td>{data.temperature}°F</td>
+                        </tr>
+                    })}
+                </tbody>
+            </table>
+        </div>
     }
 
     handleCityInputChange(event) {
@@ -136,7 +169,13 @@ export default class App extends React.Component {
             }
 
             this.setState(currentState);
-        })
+        });
+
+        ForekastServer.fetchHistoricalData(cityInput, (body) => {
+            const currentState = this.state;
+            currentState.historicalData = body;
+            this.setState(currentState);
+        });
     }
 
 }
