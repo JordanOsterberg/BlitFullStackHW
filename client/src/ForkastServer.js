@@ -3,7 +3,7 @@ const request = require("request");
 function fetchWeather(cityInput: string, allowsCache: boolean, completionHandler: function) {
     request({
         method: 'POST',
-        uri: 'http://localhost:3000/api/forecast',
+        uri: 'http://server.forekast.zone/api/forecast',
         body: {
             city: cityInput,
             allowsCache: allowsCache
@@ -21,7 +21,7 @@ function fetchWeather(cityInput: string, allowsCache: boolean, completionHandler
 function fetchHistoricalData(cityInput: string, completionHandler: function) {
     request({
         method: 'POST',
-        uri: 'http://localhost:3000/api/forecast/historical',
+        uri: 'http://server.forekast.zone/api/forecast/historical',
         body: {
             city: cityInput,
         },
