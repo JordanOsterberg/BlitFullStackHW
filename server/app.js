@@ -38,44 +38,6 @@ app.use(function(req, res, next) {
     next();
 });
 
-app.post("/api/forecast/historical", (req, res) => {
-    const city = req.body.city;
-
-    if (city === undefined || _.isEmpty(city)) {
-        return res.status(400).json({
-            error: "No city specified."
-        })
-    }
-
-    const isCityZipCode = /^\d+$/.test(city);
-
-    if (isCityZipCode) {
-        forekastDatabase.fetchHistoricalForecastDataForZipCode(city).then((result) => {
-            handleResult(result);
-        }).catch((error) => {
-            handleError(error);
-        });
-    } else {
-        forekastDatabase.fetchHistoricalForecastDataForCityName(city).then((result) => {
-            handleResult(result);
-        }).catch((error) => {
-            handleError(error);
-        });
-    }
-
-    function handleResult(result) {
-        res.status(200).json(result);
-    }
-
-    function handleError(error) {
-        res.status(500).json({
-            error: "Something went wrong while retrieving historical forecast data for " + city + "."
-        });
-
-        console.error(error)
-    }
-});
-
 app.post("/api/forecast", (req, res) => {
     const city = req.body.city;
     let allowsCache = req.body.allowsCache;
@@ -138,6 +100,44 @@ app.post("/api/forecast", (req, res) => {
 
         res.status(200).json(resultJSON);
     })
+});
+
+app.post("/api/forecast/historical", (req, res) => {
+    const city = req.body.city;
+
+    if (city === undefined || _.isEmpty(city)) {
+        return res.status(400).json({
+            error: "No city specified."
+        })
+    }
+
+    const isCityZipCode = /^\d+$/.test(city);
+
+    if (isCityZipCode) {
+        forekastDatabase.fetchHistoricalForecastDataForZipCode(city).then((result) => {
+            handleResult(result);
+        }).catch((error) => {
+            handleError(error);
+        });
+    } else {
+        forekastDatabase.fetchHistoricalForecastDataForCityName(city).then((result) => {
+            handleResult(result);
+        }).catch((error) => {
+            handleError(error);
+        });
+    }
+
+    function handleResult(result) {
+        res.status(200).json(result);
+    }
+
+    function handleError(error) {
+        res.status(500).json({
+            error: "Something went wrong while retrieving historical forecast data for " + city + "."
+        });
+
+        console.error(error)
+    }
 });
 
 // Ensure that there is a default value for PORT
